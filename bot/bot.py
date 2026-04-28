@@ -1,8 +1,5 @@
 
-import asyncio
-import json
-import os
-import random
+import asyncio, json, os, random
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -19,10 +16,7 @@ def load():
 
 def build_buttons(btns):
     if not btns: return None
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton(b["text"], url=b["url"])]
-        for b in btns
-    ])
+    return InlineKeyboardMarkup([[InlineKeyboardButton(b["text"], url=b["url"])] for b in btns])
 
 async def send_campaign(c):
     try:
@@ -31,9 +25,9 @@ async def send_campaign(c):
             await bot.send_photo(chat_id=CHANNEL, photo=c["photo"], caption=c.get("caption",""), reply_markup=buttons)
         else:
             await bot.send_message(chat_id=CHANNEL, text=c.get("caption",""), reply_markup=buttons)
-        print("Sent")
+        print("OK")
     except Exception as e:
-        print("Error:", e)
+        print("ERROR:", e)
 
 async def loop():
     while True:
