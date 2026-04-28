@@ -57,13 +57,19 @@ app.get('/',auth,(req,res)=>{
 
 app.post('/add',auth,(req,res)=>{
   const data = load();
+
+  const buttons = (req.body.btn_text && req.body.btn_url) ? [
+    { text: req.body.btn_text, url: req.body.btn_url }
+  ] : [];
+
   data.campaigns.push({
     id: uuidv4(),
     caption: req.body.caption,
     photo: req.body.photo,
-    buttons: [],
+    buttons: buttons,
     active: true
   });
+
   save(data);
   res.redirect('/');
 });
