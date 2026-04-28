@@ -3,6 +3,7 @@ import json
 import os
 import time
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
+import html
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 TARGET_CHANNEL = os.getenv("TARGET_CHANNEL")
@@ -52,27 +53,38 @@ def build_buttons(buttons):
         return None
     return InlineKeyboardMarkup(rows)
 
+# 🔥 FORMAT BOLD + AMAN HTML
+def format_bold(text):
+    safe = html.escape(text)
+    return f"<b>{safe}</b>"
+
 async def send_campaign(campaign):
     reply_markup = build_buttons(campaign.get("buttons", []))
     caption = campaign.get("caption", "") or ""
     photo = campaign.get("photo", "") or ""
 
+    # 🔥 BOLD FORMAT
+    caption_bold = format_bold(caption)
+
     if photo:
         await bot.send_photo(
             chat_id=TARGET_CHANNEL,
             photo=photo,
-            caption=caption,
-            reply_markup=reply_markup
+            caption=caption_bold,
+            reply_markup=reply_markup,
+            parse_mode="HTML"
         )
     else:
         await bot.send_message(
             chat_id=TARGET_CHANNEL,
-            text=caption or "-",
-            reply_markup=reply_markup
+            text=caption_bold or "<b>-</b>",
+            reply_markup=reply_markup,
+            parse_mode="HTML"
         )
 
 async def main_loop():
     print("Bot scheduler ON", flush=True)
+
     while True:
         data = load_data()
         now = int(time.time())
@@ -93,6 +105,7 @@ async def main_loop():
                 campaign["last_send"] = int(time.time())
                 changed = True
                 print("SENT:", campaign.get("id"), flush=True)
+
             except Exception as e:
                 print("SEND ERROR:", campaign.get("id"), e, flush=True)
 
