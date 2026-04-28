@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broadcast Panel Pro</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#020617;color:#e5e7eb;padding:22px}
+.wrap{max-width:1150px;margin:auto}
+.top{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px}
+h1,h2,h3{margin:0 0 12px}
+.card{background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:0 14px 35px rgba(0,0,0,.35)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+input,textarea{width:100%;padding:12px;border-radius:12px;border:1px solid #334155;background:#020617;color:#fff;margin-top:8px}
+textarea{min-height:130px;resize:vertical;line-height:1.5;white-space:pre-wrap}
+.btn{display:inline-block;border:0;border-radius:11px;padding:10px 14px;color:#fff;text-decoration:none;font-weight:bold;cursor:pointer;margin:4px 4px 0 0}
+.primary{background:#2563eb}.green{background:#16a34a}.yellow{background:#f59e0b;color:#111}.red{background:#dc2626}.gray{background:#334155}
+.item{background:#020617;border:1px solid #1e293b;border-radius:14px;padding:15px;margin-top:12px}
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:bold}
+.on{background:#14532d;color:#86efac}.off{background:#7f1d1d;color:#fecaca}
+.preview{max-width:280px;width:100%;border-radius:12px;margin-top:10px;border:1px solid #334155}
+.caption{white-space:pre-line;line-height:1.5;margin:10px 0}
+.small{color:#94a3b8;font-size:12px}
+hr{border:0;border-top:1px solid #1e293b;margin:16px 0}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.top{display:block}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>🚀 Broadcast Panel Pro</h1>
+      <div class="small">Scheduler per campaign, upload foto, multi CTA, edit, toggle, hapus.</div>
+    </div>
+    <a class="btn gray" href="/logout">Logout</a>
+  </div>
+
+  <div class="card">
+    <h2>➕ Tambah Campaign</h2>
+    <form method="POST" action="/add" enctype="multipart/form-data">
+      <textarea name="caption" placeholder="Tulis caption broadcast. Enter dan spasi akan tetap rapi." required></textarea>
+      <div class="grid">
+        <div><input type="file" name="photo" accept="image/*"></div>
+        <div><input type="number" name="interval" min="1" placeholder="Interval menit, contoh: 30" required></div>
+      </div>
+      <div class="grid">
+        <input name="btn_text" placeholder="Text tombol, pisah koma atau baris baru: DAFTAR,LOGIN">
+        <input name="btn_url" placeholder="URL tombol, pisah koma atau baris baru: https://a.com,https://b.com">
+      </div>
+      <button class="btn primary" type="submit">Tambah Campaign</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>📊 List Campaign</h2>
+
+    <% if(!data.campaigns || data.campaigns.length === 0){ %>
+      <p class="small">Belum ada campaign.</p>
+    <% } %>
+
+    <% (data.campaigns || []).forEach(c=>{ %>
+      <div class="item">
+        <span class="badge <%= c.active ? 'on':'off' %>"><%= c.active ? 'AKTIF':'OFF' %></span>
+        <div class="caption"><%= c.caption %></div>
+        <div class="small">ID: <%= c.id %></div>
+        <div class="small">Interval: <%= Math.floor((c.interval || 1800)/60) %> menit</div>
+        <div class="small">Last Send: <%= c.last_send ? new Date(c.last_send * 1000).toLocaleString('id-ID') : 'Belum pernah' %></div>
+
+        <% if(c.photo){ %>
+          <img src="<%= c.photo %>" class="preview">
+        <% } %>
+
+        <% if(c.buttons && c.buttons.length){ %>
+          <div style="margin-top:10px">
+          <% c.buttons.forEach(b=>{ %>
+            <div class="small">🔗 <b><%= b.text %></b> → <%= b.url %></div>
+          <% }) %>
+          </div>
+        <% } %>
+
+        <hr>
+
+        <details>
+          <summary class="btn gray">Edit Campaign</summary>
+          <form method="POST" action="/edit/<%= c.id %>" enctype="multipart/form-data" style="margin-top:10px">
+            <textarea name="caption" required><%= c.caption %></textarea>
+            <div class="grid">
+              <input type="file" name="photo" accept="image/*">
+              <input type="number" name="interval" min="1" value="<%= Math.floor((c.interval || 1800)/60) %>" required>
+            </div>
+            <label class="small"><input type="checkbox" name="remove_photo" value="1" style="width:auto"> Hapus foto lama</label>
+            <div class="grid">
+              <textarea name="btn_text" placeholder="Text tombol"><%= (c.buttons || []).map(b=>b.text).join('\n') %></textarea>
+              <textarea name="btn_url" placeholder="URL tombol"><%= (c.buttons || []).map(b=>b.url).join('\n') %></textarea>
+            </div>
+            <button class="btn green" type="submit">Simpan Edit</button>
+          </form>
+        </details>
+
+        <a class="btn yellow" href="/toggle/<%= c.id %>">Toggle ON/OFF</a>
+        <a class="btn gray" href="/reset/<%= c.id %>">Kirim di Siklus Berikutnya</a>
+        <a class="btn red" href="/delete/<%= c.id %>" onclick="return confirm('Hapus campaign ini?')">Hapus</a>
+      </div>
+    <% }) %>
+  </div>
+</div>
+</body>
+</html>
