@@ -1,1 +1,0 @@
-node panel/server.js & sleep 2 && python3 bot/bot.py
