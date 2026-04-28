@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Broadcast Panel PRO</title>
+<title>Broadcast Panel Enterprise</title>
 
 <style>
 *{box-sizing:border-box}
@@ -34,6 +34,7 @@ body{
 .on{background:#22c55e;color:#fff;}
 .off{background:#ef4444;color:#fff;}
 .add{background:#3b82f6;color:#fff;}
+.toggle{background:#facc15;color:#000;}
 
 .card{
   max-width:1100px;
@@ -85,7 +86,7 @@ textarea{
 .active{background:#22c55e}
 .inactive{background:#ef4444}
 
-.preview-img{
+.preview{
   width:100%;
   margin-top:10px;
   border-radius:10px;
@@ -96,7 +97,7 @@ textarea{
 <body>
 
 <div class="top">
-  <h2>🚀 Broadcast Panel PRO</h2>
+  <h2>🚀 Broadcast Panel Enterprise</h2>
 
   <div>
     <span class="status <%= data.is_active ? 'active':'inactive' %>">
@@ -114,16 +115,17 @@ textarea{
 <div class="card">
   <h3>➕ Tambah Campaign</h3>
 
+  <!-- WAJIB untuk upload -->
   <form method="POST" action="/add" enctype="multipart/form-data">
 
     <!-- CAPTION -->
-    <textarea name="caption" placeholder="Caption broadcast (bisa enter / paragraf)" required></textarea>
+    <textarea name="caption" placeholder="Caption (bisa enter & paragraf)" required></textarea>
 
     <!-- UPLOAD FOTO -->
     <input type="file" name="photo">
 
     <!-- INTERVAL -->
-    <input name="interval" type="number" placeholder="Interval menit (contoh: 30)" required>
+    <input type="number" name="interval" placeholder="Interval menit (contoh: 30)" required>
 
     <!-- MULTI CTA -->
     <input name="btn_text" placeholder="Text tombol (pisah koma: DAFTAR,LOGIN)">
@@ -143,14 +145,26 @@ textarea{
   <% data.campaigns.forEach(c=>{ %>
     <div class="item">
 
+      <!-- STATUS -->
+      <div style="margin-bottom:5px;">
+        <span class="status <%= c.active ? 'active':'inactive' %>">
+          <%= c.active ? 'AKTIF':'OFF' %>
+        </span>
+      </div>
+
+      <!-- CAPTION -->
       <b style="white-space:pre-line;"><%= c.caption %></b><br>
+
+      <!-- INFO -->
       <small>ID: <%= c.id %></small><br>
       <small>Interval: <%= Math.floor(c.interval/60) %> menit</small>
 
+      <!-- FOTO -->
       <% if(c.photo){ %>
-        <img src="<%= c.photo %>" class="preview-img">
+        <img src="<%= c.photo %>" class="preview">
       <% } %>
 
+      <!-- BUTTON -->
       <% if(c.buttons && c.buttons.length){ %>
         <div style="margin-top:10px;">
           <% c.buttons.forEach(b=>{ %>
@@ -159,7 +173,12 @@ textarea{
         </div>
       <% } %>
 
+      <!-- ACTION -->
       <div style="margin-top:10px;">
+        <a href="/toggle/<%=c.id%>">
+          <button class="btn toggle">Toggle</button>
+        </a>
+
         <a href="/delete/<%=c.id%>" class="delete">Hapus</a>
       </div>
 
