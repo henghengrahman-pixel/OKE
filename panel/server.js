@@ -17,16 +17,17 @@ app.set('views', path.join(__dirname,'views'));
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
-// ================= FIX UPLOAD DIR =================
+// ================= UPLOAD DIR =================
 const uploadDir = path.join(__dirname, 'uploads');
-fs.ensureDirSync(uploadDir); // 🔥 auto buat folder kalau belum ada
+fs.ensureDirSync(uploadDir);
 
+// static file upload
 app.use('/uploads', express.static(uploadDir));
 
 // ================= MULTER =================
 const storage = multer.diskStorage({
 destination: (req, file, cb) => {
-cb(null, uploadDir); // 🔥 FIX PATH
+cb(null, uploadDir);
 },
 filename: (req, file, cb) => {
 const safeName = file.originalname.replace(/[^a-zA-Z0-9.]/g,'_');
@@ -77,49 +78,68 @@ res.render('dashboard',{data:load()});
 });
 
 // ================= ADD CAMPAIGN =================
-app.post('/add',auth,upload.single('photo'),(req,res)=>{
+app.post('/add', auth, upload.single('photo'), (req,res)=>{
+try{
 const data = load();
 
+```
+// ===== BUTTON =====
 const buttons = [];
 
 if(req.body.btn_text && req.body.btn_url){
-const t = req.body.btn_text.split(',');
-const u = req.body.btn_url.split(',');
+  const t = req.body.btn_text.split(',');
+  const u = req.body.btn_url.split(',');
 
-```
-t.forEach((x,i)=>{
-  if(u[i]) buttons.push({
-    text: x.trim(),
-    url: u[i].trim()
+  t.forEach((x,i)=>{
+    if(u[i]){
+      buttons.push({
+        text: x.trim(),
+        url: u[i].trim()
+      });
+    }
   });
-});
-```
-
 }
 
-const photo = req.file
-? process.env.BASE_URL + '/uploads/' + req.file.filename
-: null;
+// ===== INTERVAL =====
+const interval = parseInt(req.body.interval);
+const intervalFix = isNaN(interval) ? 1800 : interval * 60;
 
+// ===== PHOTO =====
+let photo = null;
+
+if(req.file){
+  const base = process.env.BASE_URL || '';
+  photo = base + '/uploads/' + req.file.filename;
+}
+
+// ===== SAVE =====
 data.campaigns.push({
-id: uuidv4(),
-caption: req.body.caption,
-photo: photo,
-buttons: buttons,
-interval: parseInt(req.body.interval) * 60,
-last_send: 0,
-active: true
+  id: uuidv4(),
+  caption: req.body.caption || '',
+  photo: photo,
+  buttons: buttons,
+  interval: intervalFix,
+  last_send: 0,
+  active: true
 });
 
 save(data);
 res.redirect('/');
+```
+
+}catch(err){
+console.log(err);
+res.send('ERROR ADD CAMPAIGN');
+}
 });
 
 // ================= TOGGLE =================
 app.get('/toggle/:id',auth,(req,res)=>{
 const data = load();
 const c = data.campaigns.find(x=>x.id===req.params.id);
+
 if(c) c.active = !c.active;
+
 save(data);
 res.redirect('/');
 });
