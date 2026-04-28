@@ -1,29 +1,172 @@
-
 <!DOCTYPE html>
-<html>
-<body style="background:#020617;color:#fff;font-family:Arial">
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broadcast Panel PRO</title>
 
-<h2>Enterprise Panel</h2>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial;
+  background:#020617;
+  color:#e5e7eb;
+}
 
-<form method="POST" action="/add" enctype="multipart/form-data">
-<textarea name="caption" style="width:100%;height:120px"></textarea>
-<input type="file" name="photo">
-<input name="interval" placeholder="Interval menit">
-<input name="btn_text" placeholder="Text tombol (,)">
-<input name="btn_url" placeholder="URL tombol (,)">
-<button>Tambah</button>
-</form>
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+  max-width:1100px;
+  margin:auto;
+}
 
-<hr>
+.btn{
+  padding:10px 16px;
+  border-radius:10px;
+  border:0;
+  cursor:pointer;
+  font-weight:bold;
+}
 
-<% data.campaigns.forEach(c=>{ %>
-<div>
-<b><%= c.caption %></b><br>
-<small><%= c.active ? 'ON':'OFF' %></small><br>
-<a href="/toggle/<%=c.id%>">Toggle</a>
-<a href="/delete/<%=c.id%>">Hapus</a>
+.on{background:#22c55e;color:#fff;}
+.off{background:#ef4444;color:#fff;}
+.add{background:#3b82f6;color:#fff;}
+
+.card{
+  max-width:1100px;
+  margin:20px auto;
+  background:#0f172a;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+input, textarea{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:#fff;
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+  line-height:1.5;
+}
+
+.item{
+  background:#020617;
+  padding:15px;
+  border-radius:10px;
+  margin-top:10px;
+}
+
+.delete{
+  background:#ef4444;
+  padding:6px 10px;
+  border-radius:8px;
+  color:#fff;
+  text-decoration:none;
+  font-size:12px;
+}
+
+.status{
+  font-weight:bold;
+  padding:6px 12px;
+  border-radius:8px;
+}
+
+.active{background:#22c55e}
+.inactive{background:#ef4444}
+
+.preview-img{
+  width:100%;
+  margin-top:10px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <h2>🚀 Broadcast Panel PRO</h2>
+
+  <div>
+    <span class="status <%= data.is_active ? 'active':'inactive' %>">
+      <%= data.is_active ? 'ON':'OFF' %>
+    </span>
+
+    <a href="/toggle">
+      <button class="btn <%= data.is_active ? 'off':'on' %>">
+        <%= data.is_active ? 'STOP':'START' %>
+      </button>
+    </a>
+  </div>
 </div>
-<% }) %>
+
+<div class="card">
+  <h3>➕ Tambah Campaign</h3>
+
+  <form method="POST" action="/add" enctype="multipart/form-data">
+
+    <!-- CAPTION -->
+    <textarea name="caption" placeholder="Caption broadcast (bisa enter / paragraf)" required></textarea>
+
+    <!-- UPLOAD FOTO -->
+    <input type="file" name="photo">
+
+    <!-- INTERVAL -->
+    <input name="interval" type="number" placeholder="Interval menit (contoh: 30)" required>
+
+    <!-- MULTI CTA -->
+    <input name="btn_text" placeholder="Text tombol (pisah koma: DAFTAR,LOGIN)">
+    <input name="btn_url" placeholder="URL tombol (pisah koma: https://a.com,https://b.com)">
+
+    <button class="btn add" style="margin-top:10px">Tambah Campaign</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>📊 List Campaign</h3>
+
+  <% if(data.campaigns.length===0){ %>
+    <p style="opacity:.6">Belum ada data</p>
+  <% } %>
+
+  <% data.campaigns.forEach(c=>{ %>
+    <div class="item">
+
+      <b style="white-space:pre-line;"><%= c.caption %></b><br>
+      <small>ID: <%= c.id %></small><br>
+      <small>Interval: <%= Math.floor(c.interval/60) %> menit</small>
+
+      <% if(c.photo){ %>
+        <img src="<%= c.photo %>" class="preview-img">
+      <% } %>
+
+      <% if(c.buttons && c.buttons.length){ %>
+        <div style="margin-top:10px;">
+          <% c.buttons.forEach(b=>{ %>
+            <div style="font-size:12px;">🔗 <%= b.text %> → <%= b.url %></div>
+          <% }) %>
+        </div>
+      <% } %>
+
+      <div style="margin-top:10px;">
+        <a href="/delete/<%=c.id%>" class="delete">Hapus</a>
+      </div>
+
+    </div>
+  <% }) %>
+
+</div>
 
 </body>
 </html>
