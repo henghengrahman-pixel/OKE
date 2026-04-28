@@ -7,11 +7,12 @@ WORKDIR /app
 
 COPY . .
 
-# install dependency
+# install node
 RUN npm install
-RUN pip3 install -r requirements.txt
 
-# permission
+# 🔥 FIX ERROR PEP 668
+RUN pip3 install --break-system-packages -r requirements.txt
+
 RUN chmod +x start.sh
 
 CMD ["bash", "start.sh"]
