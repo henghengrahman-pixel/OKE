@@ -29,7 +29,7 @@ function auth(req,res,next){
   res.redirect('/login');
 }
 
-const FILE = path.join(__dirname,'../data/data.json');
+const FILE = path.join(__dirname,'data.json');
 
 function load(){
   if(!fs.existsSync(FILE)) return {is_active:false, interval:1800, campaigns:[]};
