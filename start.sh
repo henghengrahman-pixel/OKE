@@ -1,14 +1,13 @@
 #!/bin/bash
 
-set -e
+echo "Starting..."
 
-echo "Start Panel + Bot..."
-
-# jalanin panel
 node panel/server.js &
+PANEL_PID=$!
 
-# delay biar aman
 sleep 2
 
-# jalanin bot
-python3 bot/bot.py
+python3 bot/bot.py &
+BOT_PID=$!
+
+wait $PANEL_PID $BOT_PID
