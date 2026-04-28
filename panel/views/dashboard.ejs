@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Broadcast</title>
+<title>Broadcast Panel PRO</title>
 
 <style>
 *{box-sizing:border-box}
@@ -44,7 +44,7 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 
-input{
+input, textarea{
   width:100%;
   padding:12px;
   margin-top:10px;
@@ -54,10 +54,10 @@ input{
   color:#fff;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
+textarea{
+  min-height:120px;
+  resize:vertical;
+  line-height:1.5;
 }
 
 .item{
@@ -84,13 +84,19 @@ input{
 
 .active{background:#22c55e}
 .inactive{background:#ef4444}
+
+.preview-img{
+  width:100%;
+  margin-top:10px;
+  border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="top">
-  <h2>🚀 Broadcast Panel</h2>
+  <h2>🚀 Broadcast Panel PRO</h2>
 
   <div>
     <span class="status <%= data.is_active ? 'active':'inactive' %>">
@@ -108,12 +114,22 @@ input{
 <div class="card">
   <h3>➕ Tambah Campaign</h3>
 
-  <form method="POST" action="/add">
-    <input name="caption" placeholder="Caption broadcast..." required>
-    <input name="photo" placeholder="Link gambar (opsional)">
-    <input name="btn_text" placeholder="Text tombol (opsional)">
-    <input name="btn_url" placeholder="Link tombol (opsional)">
-    <button class="btn add" style="margin-top:10px">Tambah</button>
+  <form method="POST" action="/add" enctype="multipart/form-data">
+
+    <!-- CAPTION -->
+    <textarea name="caption" placeholder="Caption broadcast (bisa enter / paragraf)" required></textarea>
+
+    <!-- UPLOAD FOTO -->
+    <input type="file" name="photo">
+
+    <!-- INTERVAL -->
+    <input name="interval" type="number" placeholder="Interval menit (contoh: 30)" required>
+
+    <!-- MULTI CTA -->
+    <input name="btn_text" placeholder="Text tombol (pisah koma: DAFTAR,LOGIN)">
+    <input name="btn_url" placeholder="URL tombol (pisah koma: https://a.com,https://b.com)">
+
+    <button class="btn add" style="margin-top:10px">Tambah Campaign</button>
   </form>
 </div>
 
@@ -126,16 +142,27 @@ input{
 
   <% data.campaigns.forEach(c=>{ %>
     <div class="item">
-      <b><%= c.caption %></b><br>
+
+      <b style="white-space:pre-line;"><%= c.caption %></b><br>
       <small>ID: <%= c.id %></small><br>
+      <small>Interval: <%= Math.floor(c.interval/60) %> menit</small>
 
       <% if(c.photo){ %>
-        <img src="<%= c.photo %>" style="width:100%;margin-top:10px;border-radius:10px;">
+        <img src="<%= c.photo %>" class="preview-img">
+      <% } %>
+
+      <% if(c.buttons && c.buttons.length){ %>
+        <div style="margin-top:10px;">
+          <% c.buttons.forEach(b=>{ %>
+            <div style="font-size:12px;">🔗 <%= b.text %> → <%= b.url %></div>
+          <% }) %>
+        </div>
       <% } %>
 
       <div style="margin-top:10px;">
         <a href="/delete/<%=c.id%>" class="delete">Hapus</a>
       </div>
+
     </div>
   <% }) %>
 
