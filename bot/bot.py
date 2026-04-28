@@ -7,7 +7,7 @@ from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHANNEL = os.getenv("TARGET_CHANNEL")
-DATA_FILE = os.getenv("DATA_FILE", "data/data.json")
+DATA_FILE = "panel/data.json"
 
 bot = Bot(BOT_TOKEN)
 
