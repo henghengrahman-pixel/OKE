@@ -1,10 +1,9 @@
-
 {
   "name": "bot-panel",
   "version": "1.0.0",
   "main": "panel/server.js",
   "scripts": {
-    "start": "node panel/server.js & python3 bot/bot.py"
+    "start": "bash start.sh"
   },
   "dependencies": {
     "express": "^4.18.2",
