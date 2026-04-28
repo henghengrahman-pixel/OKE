@@ -1,0 +1,13 @@
+
+<h2>Dashboard</h2>
+<a href="/toggle">ON/OFF</a>
+<form method="POST" action="/add">
+<input name="caption" placeholder="Caption"/>
+<input name="photo" placeholder="Photo URL"/>
+<button>Add</button>
+</form>
+<ul>
+<% data.campaigns.forEach(c=>{ %>
+<li><%= c.caption %> <a href="/delete/<%=c.id%>">Hapus</a></li>
+<% }) %>
+</ul>
