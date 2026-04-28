@@ -1,5 +1,5 @@
 
-import asyncio, json, os, random
+import asyncio, json, os, time
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -10,9 +10,13 @@ bot = Bot(BOT_TOKEN)
 
 def load():
     if not os.path.exists(DATA_FILE):
-        return {"is_active": False, "interval": 1800, "campaigns": []}
+        return {"campaigns":[]}
     with open(DATA_FILE) as f:
         return json.load(f)
+
+def save(data):
+    with open(DATA_FILE,"w") as f:
+        json.dump(data,f,indent=2)
 
 def build_buttons(btns):
     if not btns: return None
@@ -25,21 +29,27 @@ async def send_campaign(c):
             await bot.send_photo(chat_id=CHANNEL, photo=c["photo"], caption=c.get("caption",""), reply_markup=buttons)
         else:
             await bot.send_message(chat_id=CHANNEL, text=c.get("caption",""), reply_markup=buttons)
-        print("OK")
+        print("sent:", c["id"])
     except Exception as e:
-        print("ERROR:", e)
+        print("error:", e)
 
 async def loop():
     while True:
         data = load()
-        if not data.get("is_active"):
-            await asyncio.sleep(10)
-            continue
-        for c in data.get("campaigns", []):
+        now = int(time.time())
+
+        for c in data.get("campaigns",[]):
             if not c.get("active"): continue
+
+            if now - c.get("last_send",0) < c.get("interval",1800):
+                continue
+
             await send_campaign(c)
-            await asyncio.sleep(random.randint(60,120))
-        await asyncio.sleep(data.get("interval",1800))
+            c["last_send"] = now
+            save(data)
+            await asyncio.sleep(5)
+
+        await asyncio.sleep(10)
 
 if __name__ == "__main__":
     asyncio.run(loop())
