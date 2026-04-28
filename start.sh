@@ -4,10 +4,10 @@ set -e
 
 echo "Start Panel + Bot..."
 
-# jalanin panel background
+# jalanin panel
 node panel/server.js &
 
-# kasih jeda biar stabil
+# delay biar aman
 sleep 2
 
 # jalanin bot
